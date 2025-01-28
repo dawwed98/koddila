@@ -1,9 +1,5 @@
-Piekarnia = ["chleb", "pączek", "bułki"]
-Warzywniak = ["marchew", "seler", "rukola"]
-Sklepy = ["Piekarnia", "Warzywniak"]
-Piekarnia = [iteam.title() for iteam in Piekarnia]
-Warzywniak = [iteam.title() for iteam in Warzywniak]
+Zakupy = {"Piekarnia":["chleb", "pączek", "bułki"], "Warzywniaka":["marchew", "seler", "rukola"]}
 print("Lista zakupów:")
-print("Ide do", Sklepy[0], "i kupuję tam następujące rzeczy:", (Piekarnia))
-print("Ide do", Sklepy[1], "i kupuję tam następujące rzeczy:", (Warzywniak))
-print("w sumie kupuje", len(Piekarnia) + len(Warzywniak), "produktów")
+print("Piekarnia:", ", ".join(Zakupy["Piekarnia"]))
+print("Warzywniak:", ", ".join(Zakupy["Warzywniaka"]))
+print("w sumie kupuje", len(Zakupy["Piekarnia"]) + len(Zakupy["Warzywniaka"]), "produktów")

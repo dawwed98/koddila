@@ -1,20 +1,13 @@
-from faker import Faker
-import random
-
-fake = Faker()
 class Film:
-    counter = 0
-    film_list = [
-       
-    ]
-    
     def __init__(self, tytuł, rok_wydania, gatunek, liczba_odtworzeń):
         self.tytuł = tytuł
         self.rok_wydania = rok_wydania
         self.gatunek = gatunek
         self.liczba_odtworzeń = liczba_odtworzeń
-        Film.counter += 1
-        Film.film_list.append(self)
+    def play(self):
+        self.liczba_odtworzeń += 1
+        return self.liczba_odtworzeń
+    
 
     def __str__(self):
         return f"{self.tytuł} ({self.rok_wydania})"
@@ -34,13 +27,17 @@ class Seriale(Film):
     def play(self):
         self.liczba_odtworzeń += 1
         return self.liczba_odtworzeń
+# Lista filmów i seriali
+filmy_i_seriale = [
+    Film("Pulp Fiction", 1994, "crime", 0),
+    Film("Matrix", 1999, "sci-fi", 0),
+    Seriale("The Simpsons", 1989, "animation", 0, 1, 1),
+    Seriale("Friends", 1994, "comedy", 0, 1, 5)
+]
 
-for i in range(5):
-    film = Film(tytuł=fake.catch_phrase(), rok_wydania=random.randint(1900, 2021), gatunek=fake.word(), liczba_odtworzeń=random.randint(0, 100))
-    print(film)
-    print(film.play())
-for i in range(5):  
-    film = Seriale(tytuł=fake.catch_phrase(), rok_wydania=random.randint(1900, 2021), gatunek=fake.word(), liczba_odtworzeń=random.randint(0, 100), numer_sezonu=random.randint(1, 10), numer_odcinka=random.randint(1, 20))
-    print(film)
-    print(film.play())
-print(Film.counter)
+# Odtwarzanie filmów i seriali
+filmy_i_seriale[0].play()
+
+for element in filmy_i_seriale:
+    print(element)
+    print(element.play())

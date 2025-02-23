@@ -26,3 +26,8 @@ plt.plot(misiace, wartosc_nieruchomosci, label="Wartość nieruchomości")
 plt.plot(misiace, wartosc_lokaty, label="Wartość lokaty")
 plt.legend()
 plt.show()
+
+# Wypisanie wyników
+print(f"Kwota miesięcznej wpłaty: {miesieczna_wplata:.2f}")
+print(f"Kwota końcowa lokaty: {wartosc_lokaty[-1]:.2f}")
+print(f"Kwota końcowa nieruchomości: {wartosc_nieruchomosci[-1]:.2f}")

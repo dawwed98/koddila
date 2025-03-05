@@ -1,63 +1,63 @@
 import sqlite3
+from sqlite3 import Error
 
 def create_connection(db_file):
-   """ create a database connection to the SQLite database
-       specified by db_file
-   :param db_file: database file
-   :return: Connection object or None
-   """
-   conn = None
-   try:
-       conn = sqlite3.connect(db_file)
-       return conn
-   except sqlite3.Error as e:
-       print(e)
-   return conn
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        return conn
+    except Error as e:
+        print(e)
+    return conn
 
-def add_project(conn, project):
-   """
-   Create a new project into the projects table
-   :param conn:
-   :param project:
-   :return: project id
-   """
-   sql = '''INSERT INTO projects(nazwa, start_date, end_date)
-             VALUES(?,?,?)'''
-   cur = conn.cursor()
-   cur.execute(sql, project)
-   conn.commit()
-   return cur.lastrowid
+def execute_sql(conn, sql):
+    try:
+        c = conn.cursor()
+        c.execute(sql)
+        conn.commit()
+    except Error as e:
+        print(e)
 
-def add_task(conn, task):
-   """
-   Create a new task into the tasks table
-   :param conn:
-   :param task:
-   :return: task id
-   """
-   sql = '''INSERT INTO tasks(project_id, nazwa, opis, status, start_date, end_date)
-             VALUES(?,?,?,?,?,?)'''
-   cur = conn.cursor()
-   cur.execute(sql, task)
-   conn.commit()
-   return cur.lastrowid
+database = r"students.db"
 
-if __name__ == "__main__":
-   project = ("Powtórka z angielskiego", "2020-05-11 00:00:00", "2020-05-13 00:00:00")
+sql_create_students_table = """
+CREATE TABLE IF NOT EXISTS students (
+    name TEXT NOT NULL,
+    surname TEXT NOT NULL,
+    average_grade REAL,
+    school_year INTEGER,
+    olympian BOOLEAN DEFAULT 0
+);
+"""
 
-   conn = create_connection("database.db")
-   pr_id = add_project(conn, project)
+sql_insert_students = """
+INSERT INTO students (name, surname, average_grade, school_year) VALUES 
+('Jan', 'Kowalski', 4.5, 3),
+('Anna', 'Nowak', 4.0, 2);
+"""
 
-   task = (
-       pr_id,
-       "Czasowniki regularne",
-       "Zapamiętaj czasowniki ze strony 30",
-       "started",
-       "2020-05-11 12:00:00",
-       "2020-05-11 15:00:00"
-   )
+sql_update_student = """
+UPDATE students 
+SET average_grade = 6
+WHERE name = 'Jan' AND surname = 'Kowalski';
+"""
 
-   task_id = add_task(conn, task)
+sql_add_olympian = """
+UPDATE students
+SET olympian = 1
+WHERE name = 'Jan' AND surname = 'Kowalski';
+"""
 
-   print(pr_id, task_id)
-   conn.commit()
+conn = create_connection(database)
+
+if conn is not None:
+    execute_sql(conn, sql_create_students_table)
+    execute_sql(conn, sql_insert_students)
+    execute_sql(conn, sql_update_student)
+    execute_sql(conn, sql_add_olympian)
+else:
+    print("Error! Cannot create the database connection.")
+
+sql_select_students = """
+SELECT * FROM students;
+"""

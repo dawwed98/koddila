@@ -69,7 +69,6 @@ def top_titles(content_type, n):
         return filmy_i_seriale
     
 top_titles("filmy", 1)
-print(top_titles("filmy", 1))
 
 
 # Odtwarzanie filmów i seriali

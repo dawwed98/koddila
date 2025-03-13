@@ -1,11 +1,11 @@
-import sqlite3
+import sqlalchemy
 import csv
 
 csv_file = 'clean_stations (1).csv'
 csv_file2 = 'clean_measure (1).csv'
 db_name = 'zadanie.db'
 
-conn = sqlite3.connect(db_name)
+conn = sqlalchemy.connect(db_name)
 cursor = conn.cursor()
 
 cursor.execute('''
@@ -37,7 +37,7 @@ with open(csv_file, 'r', newline='') as file:
             longitude = float(row['longitude'])
             elevation = float(row['elevation'])
             cursor.execute('''
-            INSERT INTO stations (station, latitude, longitude, elevation, name, country, state)
+            INSERT OR IGNORE INTO stations (station, latitude, longitude, elevation, name, country, state)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (row['station'], latitude, longitude, elevation, row['name'], row['country'], row['state']))
         except ValueError as e:
@@ -50,7 +50,7 @@ with open(csv_file2, 'r', newline='') as file:
             precip = float(row['precip'])
             tobs = float(row['tobs'])
             cursor.execute('''
-            INSERT INTO measurements (station, date, precip, tobs)
+            INSERT OR IGNORE INTO measurements (station, date, precip, tobs)
             VALUES (?, ?, ?, ?)
             ''', (row['station'], row['date'], precip, tobs))
         except ValueError as e:

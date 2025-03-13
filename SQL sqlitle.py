@@ -104,11 +104,16 @@ def update(conn, table, id, **kwargs):
         conn.commit()
     except Error as e:
         print(e)
-
+def delete_task(conn, id):
+    """"
+    """
+    sql = "DELETE FROM tasks WHERE id = ?"
+    cur = conn.cursor()
+    cur.execute(sql, (id,))
+    conn.commit()
     cur.execute("SELECT * FROM projects")
     rows = cur.fetchall()
     print(cur.execute("SELECT * FROM projects"))
-    
 
 db_file = 'database.db'
 if conn is not None:
@@ -118,7 +123,3 @@ if conn is not None:
     conn.close()
 else:
     print('Error! cannot create the database connection.')
-
-## wyciągnie task czy aktywny,
-## selec all
-## zrobic to jako metode

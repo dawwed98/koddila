@@ -1,28 +1,62 @@
-from sqlalchemy import Table, Column, Integer, String, MetaData
-from sqlalchemy import create_engine
+import sqlite3
+import csv
 
-engine = create_engine('sqlite:///database.db', echo=True)
+csv_file = 'clean_stations (1).csv'
+csv_file2 = 'clean_measure (1).csv'
+db_name = 'zadanie.db'
 
-meta = MetaData()
+conn = sqlite3.connect(db_name)
+cursor = conn.cursor()
 
-students = Table(
-   'students', meta,
-   Column('id', Integer, primary_key=True),
-   Column('name', String),
-   Column('lastname', String),
-)
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS stations (
+    station text PRIMARY KEY,
+    latitude real,
+    longitude real,
+    elevation real,
+    name text,
+    country text,
+    state text
+);
+''')
 
-meta.create_all(engine)
-print("Table created")
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS measurements (
+    station text,
+    date DATE PRIMARY KEY,
+    precip real,
+    tobs real
+);
+''')
 
-from sqlalchemy import students
-ins = students.insert()
-# ins = <sqlalchemy.sql.dml.Insert object at 0x7105489348>
-str(ins)
-'INSERT INTO students (id, name, lastname) VALUES (:id, :name, :lastname)'
+with open(csv_file, 'r', newline='') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        try:
+            latitude = float(row['latitude'])
+            longitude = float(row['longitude'])
+            elevation = float(row['elevation'])
+            cursor.execute('''
+            INSERT INTO stations (station, latitude, longitude, elevation, name, country, state)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (row['station'], latitude, longitude, elevation, row['name'], row['country'], row['state']))
+        except ValueError as e:
+            print(f"Error in stations table: {e} for row {row}")
 
-ins.compile().params
-{'id': None, 'name': None, 'lastname': None}
-ins = students.insert().values(name='Eric', lastname='Idle')
-ins.compile().params
-{'name': 'Eric', 'lastname': 'Idle'}
+with open(csv_file2, 'r', newline='') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        try:
+            precip = float(row['precip'])
+            tobs = float(row['tobs'])
+            cursor.execute('''
+            INSERT INTO measurements (station, date, precip, tobs)
+            VALUES (?, ?, ?, ?)
+            ''', (row['station'], row['date'], precip, tobs))
+        except ValueError as e:
+            print(f"Error in measurements table: {e} for row {row}")
+
+conn.commit()
+conn.close()
+
+print('Done')

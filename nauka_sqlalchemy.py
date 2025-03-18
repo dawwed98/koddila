@@ -1,62 +1,37 @@
-import sqlalchemy
-import csv
+from sqlalchemy import create_engine
+from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import inspect
+from sqlalchemy.sql import select
+from sqlalchemy.sql import text
 
-csv_file = 'clean_stations (1).csv'
-csv_file2 = 'clean_measure (1).csv'
-db_name = 'zadanie.db'
+engine = create_engine('sqlite:///database.db', echo=True)
+meta = MetaData()
 
-conn = sqlalchemy.connect(db_name)
-cursor = conn.cursor()
+Zadanie = Table('zadanie', meta,
+                Column('station_id', Integer, ForeignKey('station.station_id')),
+                Column('date', String),
+                Column('precip', Integer),
+                Column('tobs', Integer),
+)
 
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS stations (
-    station text PRIMARY KEY,
-    latitude real,
-    longitude real,
-    elevation real,
-    name text,
-    country text,
-    state text
-);
-''')
+Station = Table('station', meta,
+                Column('station_id', Integer, primary_key=True),
+                Column('latitude', Integer),
+                Column('longitude', Integer),
+                Column('elevation', Integer),
+                Column('name', String),
+                Column('country', String),
+                Column('state', String),
+)
 
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS measurements (
-    station text,
-    date DATE PRIMARY KEY,
-    precip real,
-    tobs real
-);
-''')
+def insert_station(station,latitude,longitude,elevation,name,country,state):
+    ins = Station.insert().values(station_id='USC00519397', latitude=21.2716, longitude=-157.8168, elevation=3.0, name='WAIKIKI 717.2', country='US', state='HI')
+    ins = Station.insert().values(station_id='USC00513117', latitude=21.4234, longitude=-157.8015, elevation=14.6, name='KANEOHE 838.1', country='US', state='HI')
+    conn = engine.connect()
+    conn.execute(ins)
+    conn.execute("SELECT * FROM station LIMIT 5").fetchall() 
+    conn.close()
 
-with open(csv_file, 'r', newline='') as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        try:
-            latitude = float(row['latitude'])
-            longitude = float(row['longitude'])
-            elevation = float(row['elevation'])
-            cursor.execute('''
-            INSERT OR IGNORE INTO stations (station, latitude, longitude, elevation, name, country, state)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (row['station'], latitude, longitude, elevation, row['name'], row['country'], row['state']))
-        except ValueError as e:
-            print(f"Error in stations table: {e} for row {row}")
-
-with open(csv_file2, 'r', newline='') as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        try:
-            precip = float(row['precip'])
-            tobs = float(row['tobs'])
-            cursor.execute('''
-            INSERT OR IGNORE INTO measurements (station, date, precip, tobs)
-            VALUES (?, ?, ?, ?)
-            ''', (row['station'], row['date'], precip, tobs))
-        except ValueError as e:
-            print(f"Error in measurements table: {e} for row {row}")
-
-conn.commit()
-conn.close()
-
-print('Done')
+meta.create_all(engine)
+inspector = inspect(engine)
+print(inspector.get_table_names())

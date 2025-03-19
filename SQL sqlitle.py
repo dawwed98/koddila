@@ -55,6 +55,7 @@ def add_project(conn, name, start_date, end_date):
     cur = conn.cursor()
     cur.execute(sql, (name, start_date, end_date))
     return cur.lastrowid
+
 def add_task(conn, project_id, name, opis, status, start_date, end_date):
     sql = """ \
     INSERT INTO tasks (project_id, name, opis, status, start_date, end_date)
@@ -62,27 +63,10 @@ def add_task(conn, project_id, name, opis, status, start_date, end_date):
     """
     cur = conn.cursor()
     cur.execute(sql, (project_id, name, opis, status, start_date, end_date))
+    
     ##conn.commit()
+    
     return cur.lastrowid
-if __name__ == '__main__':
-    db_file = 'database.db'
-    conn = create_connection(db_file)
-    pr_id = add_project(conn, "Rysunek", "2019-01-01", "2019-01-30")
-    task_id = add_task(conn, pr_id, "Zrobic kreske", "Kreska od lewej do prawej", "aktywny", "2019-01-01", "2019-01-30")
-    print(pr_id, task_id)
-    conn.commit()
-    conn.close()
-    conn = create_connection(db_file)
-    cur = conn.cursor()
-
-def update(conn, table, id, **kwargs):
-    """
-    update status, start_date, end_date of a task
-    :param conn:
-    :param table: table name
-    :param id: row id
-    return: 
-    """
 
 def update(conn, table, id, **kwargs):
     """
@@ -104,22 +88,65 @@ def update(conn, table, id, **kwargs):
         conn.commit()
     except Error as e:
         print(e)
-def delete_task(conn, id):
+
+def delete_where(conn, table, **kwargs):
     """"
     """
-    sql = "DELETE FROM tasks WHERE id = ?"
+    qs = []
+    values = tuple()
+    for k, v in kwargs.items():
+        qs.append(f"{k} = ?")
+        values += (v,)
+    qs = " AND ".join(qs)
+    sql = f"DELETE FROM {table} WHERE {qs}"
     cur = conn.cursor()
-    cur.execute(sql, (id,))
+    cur.execute(sql, values)
     conn.commit()
-    cur.execute("SELECT * FROM projects")
-    rows = cur.fetchall()
-    print(cur.execute("SELECT * FROM projects"))
 
-db_file = 'database.db'
-if conn is not None:
-    execute_sql(conn, create_project_sql)
-    execute_sql(conn, create_task_sql)
-    execute_sql(conn, insert_project_sql)
+def delate_all(conn, table):
+    """
+    """
+    sql = f"DELETE FROM {table}"
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+
+def select_all(conn, table):
+    """
+    """
+    cur = conn.cursor()
+    cur.execute(f"SELECT * FROM {table}")
+    rows = cur.fetchall()
+    return rows
+
+def select_where(conn, table, **kwargs):
+    """
+    """
+    qs = []
+    values = tuple()
+    for k, v in kwargs.items():
+        qs.append(f"{k} = ?")
+        values += (v,)
+    qs = " AND ".join(qs)
+    sql = f"SELECT * FROM {table} WHERE {qs}"
+    cur = conn.cursor()
+    cur.execute(sql, values)
+    rows = cur.fetchall()
+    return rows
+
+if __name__ == '__main__':
+    db_file = 'database.db'
+    conn = create_connection(db_file)
+    if conn is not None:
+        execute_sql(conn, create_project_sql)
+        execute_sql(conn, create_task_sql)
+        execute_sql(conn, insert_project_sql)
+        conn.close()
+    else:
+        print('Error! cannot create the database connection.')
+    pr_id = add_project(conn, "Rysunek", "2019-01-01", "2019-01-30")
+    task_id = add_task(conn, pr_id, "Zrobic kreske", "Kreska od lewej do prawej", "aktywny", "2019-01-01", "2019-01-30")
+    print(pr_id, task_id)
+    conn.commit()
     conn.close()
-else:
-    print('Error! cannot create the database connection.')
+    

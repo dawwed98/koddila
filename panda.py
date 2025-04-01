@@ -1,14 +1,14 @@
 import pandas as pd
 
-df = pd.read_excel('strona.xlsx')
+df = pd.read_excel('a3.xlsx')
+
+df.rename(columns={'Unnamed: 0': 'Lp.', 'Unnamed: 1': 'Pozycja', 'Unnamed: 2': 'Tytuł', 'ARTIST': 'Autor', 'Unnamed: 4': 'Data wydania', 'HIGH POSN': 'Max pozycja'}, inplace=True)
 df.head()
 print(df)
-
-df.to_excel('strona.xlsx', sheet_name='dane')
-
-writer = pd.ExcelWriter('strona.xlsx', engine='xlsxwriter')
+                   
+writer = pd.ExcelWriter('a3.xlsx', engine='xlsxwriter')
 df.to_excel(writer, sheet_name='dane')
-df.to_excel(writer, sheet_name='dane', startcol= 3, startrow= 2, index=False)
-writer.save()
-
-show = pd.read_excel('strona.xlsx')
+df.to_excel(writer, sheet_name='dane', startcol= 0, startrow= 1, index=False)
+writer.close()
+show = pd.read_excel('a3.xlsx')
+print(show)
